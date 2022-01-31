@@ -5,9 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Core.Models;
 using Core.DataAccess.Data.Repository.IRepository;
+using Microsoft.AspNetCore.Authorization;
+using Core.Utility;
 
 namespace Core.Areas.Admin.Controllers
 {
+    [Authorize]
     [Area("Admin")]
     public class CategoryController : Controller
     {
@@ -67,7 +70,8 @@ namespace Core.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            return Json(new { data = _iunitOfWork.Category.GetAll() });
+            // return Json(new { data = _iunitOfWork.Category.GetAll() });
+            return Json(new { data = _iunitOfWork.SP_Call.ReturnList<Category>(SD.usp_GetAllCategory, null) });
         }
 
 
@@ -83,7 +87,7 @@ namespace Core.Areas.Admin.Controllers
             _iunitOfWork.Category.Remove(objectFromDb);
             _iunitOfWork.Save();
             return Json(new { success = true, message = "Deleted Successfully" });
-        } 
+        }
 
         #endregion
 

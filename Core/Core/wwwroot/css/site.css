@@ -1,3 +1,11 @@
+:root {
+    --lightShadow: 2px 4px 2px 0px rgba(0, 0, 0, 0.5);
+    --darkShadow: 3px 8px 4px 0px rgba(0, 0, 0, 0.5);
+    --mainTransition: all 0.1s linear;
+}
+
+
+
 a.navbar-brand {
     white-space: normal;
     text-align: center;
@@ -87,24 +95,32 @@ body {
 }
 
 
-
 .login-form {
-    width: 340px;
-    margin: 50px auto;
+    width: 450px;
+    margin: 100px auto;
 }
 
-    .login-form form {
-        margin-bottom: 15px;
-        background: #f7f7f7;
-        box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-        padding: 30px;
-    }
+.login-form form {
+    margin-bottom: 15px;
+    background: #f7f7f7;
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    padding: 30px;
+}
 
-    .login-form h2 {
-        margin: 0 0 15px;
-    }
+.login-form h2 {
+    margin: 0 0 15px;
+}
 
 .form-control, .btn {
     min-height: 38px;
     border-radius: 2px;
 }
+
+.btn {
+    box-shadow: var(--lightShadow);
+    transition: var(--mainTransition);
+}
+
+    .btn:hover {
+        box-shadow: var(--darkShadow);
+    }

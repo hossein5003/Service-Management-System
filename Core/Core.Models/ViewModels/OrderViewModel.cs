@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Core.Models.ViewModels
 {
-    public class CartViewModel
+    public class OrderViewModel
     {
-        public IList<Service>? ServiceList { get; set; }
         public OrderHeader OrderHeader { get; set; }
+        public IEnumerable<OrderDetails> OrderDetails { get; set; }
     }
 }

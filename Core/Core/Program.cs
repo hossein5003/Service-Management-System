@@ -1,4 +1,5 @@
 using Core.DataAccess.Data;
+using Core.DataAccess.Data.Initializer;
 using Core.DataAccess.Data.Repository.IRepository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -9,12 +10,20 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// Added .AddRoles<IdentityRole>() to code below to earn the ability to add roles ...
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddRoles<IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
+
+// this is used when there is no AddDefaultIdentity ...
+//builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+//                .AddEntityFrameworkStores<ApplicationDbContext>()
+//                .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+//builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 builder.Services.AddSession(options =>
 {
@@ -36,6 +45,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 
+
+IDbInitializer dbinit;
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -57,6 +68,7 @@ app.UseSession();
 app.UseCookiePolicy();
 
 app.UseRouting();
+//DbInitializer.Initialize();
 
 app.UseAuthentication();
 app.UseAuthorization();

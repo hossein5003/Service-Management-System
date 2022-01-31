@@ -9,13 +9,16 @@ namespace Core.DataAccess.Data.Repository.IRepository
     {
         T Get(int id);
 
-        IEnumerable<T> GetAll(
+        IEnumerable<T> GetAll
+            (
             Expression<Func<T, bool>> filter = null,
-            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+            Func<IQueryable<T>,
+            IOrderedQueryable<T>> orderBy = null,
             String inculdeProperties=null
             );
 
-        T GetFirstOrDefualt(
+        T GetFirstOrDefualt
+            (
             Expression<Func<T, bool>> filter = null,
             String inculdeProperties = null
             );

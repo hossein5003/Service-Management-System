@@ -2,9 +2,11 @@
 using Core.DataAccess.Data.Repository.IRepository;
 using Core.Models.ViewModels;
 using Core.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Core.Areas.Admin.Controllers
 {
+    [Authorize]
     [Area("Admin")]
     public class ServiceController : Controller
     {

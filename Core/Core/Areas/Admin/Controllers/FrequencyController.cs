@@ -5,9 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Core.Models;
 using Core.DataAccess.Data.Repository.IRepository;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Core.Areas.Admin.Controllers
 {
+    [Authorize]
     [Area("Admin")]
     public class FrequencyController : Controller
     {

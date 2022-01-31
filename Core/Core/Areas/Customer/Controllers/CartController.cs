@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Core.DataAccess.Data.Repository;
 using Core.DataAccess.Data.Repository.IRepository;
 using Core.Extentions;
 using Core.Models;
@@ -14,14 +15,14 @@ namespace Core.Areas.Customer.Controllers
     [Area("Customer")]
     public class CartController : Controller
     {
-        private readonly IUnitOfWork _iUnitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         [BindProperty]
         public CartViewModel CartVM { get; set; }
 
-        public CartController(IUnitOfWork iUnitOfWork)
+        public CartController(IUnitOfWork unitOfWork)
         {
-            _iUnitOfWork = iUnitOfWork;
+            _unitOfWork = unitOfWork;
             CartVM = new CartViewModel()
             {
                 OrderHeader = new Models.OrderHeader(),
@@ -31,50 +32,46 @@ namespace Core.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
-            var Carts = HttpContext.Session.GetObject<List<int>>(SD.SessionCart);
-
-            if (Carts != null)
+            if (HttpContext.Session.GetObject<List<int>>(SD.SessionCart) != null)
             {
-                List<int> SessionList = Carts;
-                    
-                foreach(int ServiceId in SessionList)
+                List<int> sessionList = new List<int>();
+                sessionList = HttpContext.Session.GetObject<List<int>>(SD.SessionCart);
+                foreach (int serviceId in sessionList)
                 {
-                    CartVM.ServiceList.Add(_iUnitOfWork.Service
-                        .GetFirstOrDefualt(u => u.Id == ServiceId, inculdeProperties: "Category,Frequency"));
+                    CartVM.ServiceList.Add(_unitOfWork.Service.GetFirstOrDefualt(u => u.Id == serviceId, inculdeProperties: "Frequency,Category"));
                 }
             }
-
             return View(CartVM);
         }
 
+
         public IActionResult Summary()
         {
-            List<int> Carts = HttpContext.Session.GetObject<List<int>>(SD.SessionCart);
-
-            if (Carts != null)
+            if (HttpContext.Session.GetObject<List<int>>(SD.SessionCart) != null)
             {
-                foreach (int ServiceId in Carts)
+                List<int> sessionList = new List<int>();
+                sessionList = HttpContext.Session.GetObject<List<int>>(SD.SessionCart);
+                foreach (int serviceId in sessionList)
                 {
-                    CartVM.ServiceList.Add(_iUnitOfWork.Service
-                        .GetFirstOrDefualt(u => u.Id == ServiceId, inculdeProperties: "Category,Frequency"));
+                    CartVM.ServiceList.Add(_unitOfWork.Service.GetFirstOrDefualt(u => u.Id == serviceId, inculdeProperties: "Frequency,Category"));
                 }
             }
-
             return View(CartVM);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [ActionName("Summary")]
-        public IActionResult SummaryPost()
+        public IActionResult SummaryPOST()
         {
-            var Carts = HttpContext.Session.GetObject<List<int>>(SD.SessionCart);
-            CartVM.ServiceList = new List<Service>();
-
-            if (Carts != null)
+            if (HttpContext.Session.GetObject<List<int>>(SD.SessionCart) != null)
             {
-                foreach (int ServiceId in Carts)
+                List<int> sessionList = new List<int>();
+                sessionList = HttpContext.Session.GetObject<List<int>>(SD.SessionCart);
+                CartVM.ServiceList = new List<Service>();
+                foreach (int serviceId in sessionList)
                 {
-                    CartVM.ServiceList.Add(_iUnitOfWork.Service.GetFirstOrDefualt(u => u.Id == ServiceId, inculdeProperties: "Category,Frequency"));
+                    CartVM.ServiceList.Add(_unitOfWork.Service.Get(serviceId));
                 }
             }
 
@@ -87,24 +84,23 @@ namespace Core.Areas.Customer.Controllers
                 CartVM.OrderHeader.OrderDate = DateTime.Now;
                 CartVM.OrderHeader.Status = SD.StatusSubmitted;
                 CartVM.OrderHeader.ServiceCount = CartVM.ServiceList.Count;
+                _unitOfWork.OrderHeader.Add(CartVM.OrderHeader);
+                _unitOfWork.Save();
 
-                _iUnitOfWork.OrderHeader.Add(CartVM.OrderHeader);
-                _iUnitOfWork.Save();
-
-                foreach(var item in CartVM.ServiceList)
+                foreach (var item in CartVM.ServiceList)
                 {
-                    OrderDetails orderDetails = new OrderDetails()
+                    OrderDetails orderDetails = new OrderDetails
                     {
-                        ServiceId=item.Id,
-                        OrderHeaderId=CartVM.OrderHeader.Id,
-                        ServiceName=item.Name,
-                        Price=item.Price
+                        ServiceId = item.Id,
+                        OrderHeaderId = CartVM.OrderHeader.Id,
+                        ServiceName = item.Name,
+                        Price = item.Price
                     };
 
-                    _iUnitOfWork.OrderDetails.Add(orderDetails);
+                    _unitOfWork.OrderDetails.Add(orderDetails);
                 }
 
-                _iUnitOfWork.Save();
+                _unitOfWork.Save();
                 HttpContext.Session.SetObject(SD.SessionCart, new List<int>());
                 return RedirectToAction("OrderConfirmation", "Cart", new { id = CartVM.OrderHeader.Id });
             }
@@ -115,12 +111,13 @@ namespace Core.Areas.Customer.Controllers
             return View(id);
         }
 
+
         public IActionResult Remove(int serviceId)
         {
-            var Carts = HttpContext.Session.GetObject<List<int>>(SD.SessionCart);
-            Carts.Remove(serviceId);
-
-            HttpContext.Session.SetObject(SD.SessionCart, Carts);
+            List<int> sessionList = new List<int>();
+            sessionList = HttpContext.Session.GetObject<List<int>>(SD.SessionCart);
+            sessionList.Remove(serviceId);
+            HttpContext.Session.SetObject(SD.SessionCart, sessionList);
 
             return RedirectToAction(nameof(Index));
         }
