@@ -1,2 +1,6 @@
-# service-management-dotnet-6
-a service management web application where admin can add services and customers can select services to their shopping cards 
+# Service Management
+Backend : .net 6 <br>
+Frontend : Html , CSS ,Javascript <br>
+a service management web application where admin can add services and customers can select services and add them to their shopping cards. This web application has the ability to authenticate and authorize users.
+
+
